@@ -132,7 +132,7 @@ jobs:
           target: win
         if: ${{ inputs.build-debug-info && (success() || failure()) }}
 
-  build-ios:
+    build-ios:
     name: Build iOS
     runs-on: macos-latest
 
@@ -152,14 +152,6 @@ jobs:
           has-sccache: ${{ inputs.use-ccache }}
         if: ${{ inputs.build-debug-info }}
 
-      - name: Setup Ninja
-        uses: ./.github/actions/setup-ninja
-        with:
-          host: mac
-
-      - name: Setup CLI
-        uses: geode-sdk/cli/.github/actions/setup@main
-
       - name: Setup Xcode
         run: sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
 
@@ -177,7 +169,7 @@ jobs:
 
       - name: Build
         run: |
-          ${{ env.base-build-command }}
+          cmake --build build --config Release --parallel
           ${{ steps.build-debug-info.outputs.extra-build }}
 
       - name: Upload Artifacts
@@ -191,6 +183,7 @@ jobs:
         with:
           target: ios
         if: ${{ inputs.build-debug-info && (success() || failure()) }}
+
 
   build-mac:
     name: Build macOS
