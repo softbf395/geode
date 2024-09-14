@@ -134,6 +134,68 @@ jobs:
         target: win
       if: inputs.build-debug-info && (success() || failure())
 
+    build-ios:
+    name: Build iOS
+    runs-on: macos-latest
+
+    env:
+      SCCACHE_CACHE_MULTIARCH: 1
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Prepare for Build Debug Info
+      id: build-debug-info
+      uses: ./.github/actions/build-debug-info
+      with:
+        has-sccache: ${{ inputs.use-ccache }}
+      if: inputs.build-debug-info
+
+    # Setup Ninja
+    - name: Setup Ninja
+      uses: ./.github/actions/setup-ninja
+      with:
+        host: mac
+
+    - name: Setup CLI
+      uses: geode-sdk/cli/.github/actions/setup@main
+
+    - name: Setup Xcode
+      run: sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
+
+    - name: Install CocoaPods
+      run: sudo gem install cocoapods
+
+    - name: Configure
+      run: |
+        ${{ env.base-configure-command }}
+        -DCMAKE_SYSTEM_NAME=iOS
+        -DCMAKE_OSX_SYSROOT=iphoneos
+        -DCMAKE_OSX_DEPLOYMENT_TARGET=10.0
+        -DCMAKE_OSX_ARCHITECTURES="arm64"
+        ${{ steps.build-debug-info.outputs.extra-configure }}
+
+    - name: Build
+      run: |
+        ${{ env.base-build-command }}
+        ${{ steps.build-debug-info.outputs.extra-build }}
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: geode-ios
+        path: ./bin/nightly
+
+    - name: Complete Build Debug Info
+      uses: ./.github/actions/build-debug-info-post
+      with:
+        target: ios
+      if: inputs.build-debug-info && (success() || failure())
+
+  
   build-mac:
     name: Build macOS
     runs-on: macos-latest
