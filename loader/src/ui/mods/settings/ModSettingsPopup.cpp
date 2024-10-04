@@ -6,6 +6,7 @@
 #include <Geode/ui/ScrollLayer.hpp>
 #include <Geode/utils/cocos.hpp>
 #include <Geode/ui/General.hpp>
+#include <Geode/ui/Scrollbar.hpp>
 #include <loader/SettingNodeV3.hpp>
 // needed for weightedFuzzyMatch
 #include <ui/mods/sources/ModListSource.hpp>
@@ -345,9 +346,9 @@ void ModSettingsPopup::onClose(CCObject* sender) {
     GeodePopup::onClose(sender);
 }
 
-ModSettingsPopup* ModSettingsPopup::create(Mod* mod) {
+ModSettingsPopup* ModSettingsPopup::create(Mod* mod, bool forceDisableTheme) {
     auto ret = new ModSettingsPopup();
-    if (ret->init(440, 280, mod)) {
+    if (ret->init(440, 280, mod, GeodePopupStyle::Default, forceDisableTheme)) {
         ret->autorelease();
         return ret;
     }

@@ -49,7 +49,7 @@ matjson::Value& Mod::getSaveContainer() {
 }
 
 matjson::Value& Mod::getSavedSettingsData() {
-    return m_impl->getSavedSettingsData();
+    return m_impl->m_settings->getSaveData();
 }
 
 bool Mod::isEnabled() const {

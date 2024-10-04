@@ -1,5 +1,26 @@
 # Geode Changelog
 
+## v3.8.1
+ * Fix CCLightning header
+ * Fix server query default value (8be97b7)
+ * Fix importance resolving in disabled mods (d40ba6d)
+
+## v3.8.0
+ * Add Modtober integration! For more about Modtober, join [the GDP Discord server](https://discord.gg/gd-programming-646101505417674758) (964624b)
+ * Add `Popup::CloseEvent` (6270e1c)
+ * Add `openSettingsPopup` overload that returns the created `Popup` (dc8d271)
+ * Fix `CCNode::querySelector` logspamming (b53759f)
+ * Fix `followThunkFunction` following through into hook handlers (ad26357)
+
+## v3.7.1
+ * Fix crash with saving older custom settings (c3e7f23)
+ * Add missing CCDrawNode::drawRect overload (145adb2)
+
+## v3.7.0
+ * Add persistent directory for mods to save data that won't be deleted when the mod/Geode is uninstalled (68ab475)
+ * Fix touch priority issues in the settings popup (b3d5474)
+ * Fix settings with custom types not being saved & loaded properly (f0b6a70)
+
 ## v3.6.1
  * Fix modrm rip relative instruction displacement saving the clobbered register (ddfe8e2)
  * Fix `DataSaved` and `DataLoaded` events (8615bbd, 43adb35)
