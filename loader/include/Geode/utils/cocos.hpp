@@ -620,37 +620,11 @@ namespace geode::cocos {
      * @returns Child at index cast to the given type,
      * or nullptr if index exceeds bounds
      */
-    template <class Type = cocos2d::CCNode>
-    static Type* getChildOfType(cocos2d::CCNode* node, int index) {
-        size_t indexCounter = 0;
-        if (node->getChildrenCount() == 0) return nullptr;
-        // start from end for negative index
-        if (index < 0) {
-            index = -index - 1;
-            for (size_t i = node->getChildrenCount() - 1; i >= 0; i--) {
-                auto obj = cast::typeinfo_cast<Type*>(node->getChildren()->objectAtIndex(i));
-                if (obj != nullptr) {
-                    if (indexCounter == index) {
-                        return obj;
-                    }
-                    ++indexCounter;
-                }
-                if (i == 0) break;
-            }
-        }
-        else {
-            for (size_t i = 0; i < node->getChildrenCount(); i++) {
-                auto obj = cast::typeinfo_cast<Type*>(node->getChildren()->objectAtIndex(i));
-                if (obj != nullptr) {
-                    if (indexCounter == index) {
-                        return obj;
-                    }
-                    ++indexCounter;
-                }
-            }
-        }
 
-        return nullptr;
+    template <class Type = cocos2d::CCNode>
+    [[deprecated("Use CCNode::getChildByType instead")]]
+    static Type* getChildOfType(cocos2d::CCNode* node, int index) {
+        return node->getChildByType<Type>(index);
     }
 
     /**
@@ -997,7 +971,8 @@ namespace std {
     template <typename T>
     struct std::hash<geode::WeakRef<T>> {
         size_t operator()(geode::WeakRef<T> const& ref) const {
-            return hash{}(ref.m_controller);
+            // the explicit template argument is needed here because it would otherwise cast to WeakRef and recurse
+            return hash<std::shared_ptr<geode::WeakRefController>>{}(ref.m_controller);
         }
     };
 }
@@ -1385,6 +1360,42 @@ namespace geode::cocos {
             auto lambda = LambdaCallback<Node>::create(std::forward<std::remove_reference_t<decltype(callback)>>(callback));
             item->setTarget(lambda, menu_selector(LambdaCallback<Node>::execute));
             item->setUserObject("lambda-callback", lambda);
+        }
+    };
+
+    // CCCallFunc alternative that accepts a lambda (or any function object)
+    template <std::invocable F>
+    class CallFuncExtImpl : public cocos2d::CCActionInstant {
+    public:
+        static CallFuncExtImpl* create(const F& func) {
+            auto ret = new CallFuncExtImpl;
+            ret->m_func = func;
+            ret->autorelease();
+            return ret;
+        }
+
+        static CallFuncExtImpl* create(F&& func) {
+            auto ret = new CallFuncExtImpl;
+            ret->m_func = std::move(func);
+            ret->autorelease();
+            return ret;
+        }
+
+    private:
+        F m_func;
+
+        void update(float) override {
+            if (m_func) this->m_func();
+        }
+    };
+
+    // small hack to allow template deduction
+    struct CallFuncExt {
+        template <std::invocable F>
+        static auto create(F&& func) {
+            using Fd = std::decay_t<F>;
+            
+            return CallFuncExtImpl<Fd>::create(std::forward<F>(func));
         }
     };
 

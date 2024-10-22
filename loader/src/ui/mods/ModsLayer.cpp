@@ -684,7 +684,7 @@ void ModsLayer::onSearch(CCObject*) {
     }
 }
 void ModsLayer::onTheme(CCObject*) {
-    auto old = Mod::get()->template getSettingValue<bool>("enable-geode-theme");
+    auto old = Mod::get()->getSettingValue<bool>("enable-geode-theme");
     createQuickPopup(
         "Switch Theme",
         fmt::format(
@@ -705,7 +705,7 @@ void ModsLayer::onTheme(CCObject*) {
     );
 }
 void ModsLayer::onSettings(CCObject*) {
-    openSettingsPopup(Mod::get());
+    openSettingsPopup(Mod::get(), false);
 }
 
 ModsLayer* ModsLayer::create() {
